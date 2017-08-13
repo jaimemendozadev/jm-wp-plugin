@@ -13230,6 +13230,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var wpURL = window.location.origin;
 var wp = new _wpapi2.default({ endpoint: wpURL + '/wp-json' });
+
 var styles = {
   indexStyle: {
     width: '80%',
@@ -13242,7 +13243,8 @@ var styles = {
     marginBottom: '1em',
     height: '200px',
     padding: '2em',
-    border: '1px solid gray'
+    border: '1px solid gray',
+    borderRadius: '10px'
   }
 };
 
@@ -33808,6 +33810,10 @@ var _react = __webpack_require__(55);
 
 var _react2 = _interopRequireDefault(_react);
 
+var _wpapi = __webpack_require__(203);
+
+var _wpapi2 = _interopRequireDefault(_wpapi);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function setPostState(data) {
@@ -33875,11 +33881,50 @@ function editPost(post) {
   this.setState({ toEdit: post });
 }
 
+function handleEscape(text) {
+  var entityMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    '/': '&#x2F;',
+    '`': '&#x60;',
+    '=': '&#x3D;'
+  };
+
+  return String(text).replace(/[&<>"'`=\/]/g, function (s) {
+    return entityMap[s];
+  });
+};
+
+function submitPostChanges(id, title) {
+  var _this2 = this;
+
+  var wp = new _wpapi2.default({
+    endpoint: window.location.origin + '/wp-json',
+    nonce: secretCredentials.nonce
+  });
+
+  //make api call
+  wp.posts().id(id).update({
+    title: title,
+    status: 'publish'
+  }).then(function (response) {
+    console.log('post updates saved in DB, response is ' + JSON.stringify(response));
+  }).catch(function (error) {
+    console.log("man bruh you f'd up", error);
+    _this2.setState({ postError: true });
+  });
+}
+
 var utils = {
   setPostState: setPostState,
   getPosts: getPosts,
   haveThePosts: haveThePosts,
-  editPost: editPost
+  editPost: editPost,
+  handleEscape: handleEscape,
+  submitPostChanges: submitPostChanges
 };
 
 exports.default = utils;
@@ -33963,6 +34008,10 @@ var _react = __webpack_require__(55);
 
 var _react2 = _interopRequireDefault(_react);
 
+var _utils = __webpack_require__(243);
+
+var _utils2 = _interopRequireDefault(_utils);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -33981,10 +34030,12 @@ var EditView = function (_Component) {
 
     _this.state = {
       title: 'Enter a New Title',
-      current: _this.props.toEdit
+      current: _this.props.toEdit,
+      postError: false
     };
     _this.handleChange = _this.handleChange.bind(_this);
     _this.handleSubmit = _this.handleSubmit.bind(_this);
+    _this.submitPostChanges = _utils2.default.submitPostChanges.bind(_this);
 
     return _this;
   }
@@ -34000,11 +34051,22 @@ var EditView = function (_Component) {
     key: 'handleSubmit',
     value: function handleSubmit(event) {
       event.preventDefault();
-      //make api call
+
+      var id = this.state.current.id;
+      var title = _utils2.default.handleEscape(this.state.title);
+
+      this.submitPostChanges(id, title);
     }
   }, {
     key: 'render',
     value: function render() {
+      if (this.state.postError === true) {
+        return _react2.default.createElement(
+          'h1',
+          null,
+          'Whoops! There was error saving your post changes. Try again later.'
+        );
+      }
       return _react2.default.createElement(
         'div',
         null,
@@ -34029,7 +34091,12 @@ var EditView = function (_Component) {
             'New Title'
           ),
           _react2.default.createElement('br', null),
-          _react2.default.createElement('input', { id: 'newTitle', onChange: this.handleChange, value: this.state.title })
+          _react2.default.createElement('input', { id: 'newTitle', onChange: this.handleChange, value: this.state.title }),
+          _react2.default.createElement(
+            'button',
+            null,
+            'Click To Submit Change'
+          )
         )
       );
     }

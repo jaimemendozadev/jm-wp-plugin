@@ -1,4 +1,7 @@
 import React from 'react';
+import wpapi from 'wpapi';
+
+
 
 function setPostState(data){
   var posts;
@@ -65,12 +68,56 @@ function editPost(post) {
 }
 
 
+function handleEscape(text){
+  var entityMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    '/': '&#x2F;',
+    '`': '&#x60;',
+    '=': '&#x3D;'
+  };
+
+  return String(text).replace(/[&<>"'`=\/]/g, function (s) {
+    return entityMap[s];
+  });
+};
+
+
+function submitPostChanges(id, title){
+
+  var wp = new wpapi({
+    endpoint: `${window.location.origin}/wp-json`,
+    nonce: secretCredentials.nonce
+  });
+
+  //make api call
+  wp.posts().id(id).update({
+    title,
+    status: 'publish'
+  }).then((response) => {
+    console.log(`post updates saved in DB, response is ${JSON.stringify(response)}`);
+  }).catch((error) => {
+    console.log("man bruh you f'd up", error);
+    this.setState({postError: true})
+  })
+}
+
+
+
+
+
+
 
 const utils = {
   setPostState: setPostState,
   getPosts: getPosts,
   haveThePosts: haveThePosts,
-  editPost: editPost
+  editPost: editPost,
+  handleEscape: handleEscape,
+  submitPostChanges: submitPostChanges
 }
 
 export default utils;

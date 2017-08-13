@@ -8,6 +8,7 @@ import utils from './components/utils.jsx';
 
 const wpURL = window.location.origin;
 const wp = new wpapi({endpoint: `${wpURL}/wp-json`});
+
 const styles = {
   indexStyle: {
     width: '80%',
@@ -20,7 +21,8 @@ const styles = {
     marginBottom: '1em',
     height: '200px',
     padding: '2em',
-    border: '1px solid gray'
+    border: '1px solid gray',
+    borderRadius: '10px'
   }
 }
  
@@ -49,7 +51,7 @@ class App extends Component {
     if (this.state.firstFive.length === 0){
       return utils.haveThePosts(this.state.firstFive, this.state.error);
     }
-        
+    
     return(
       <div style={styles.indexStyle}>
         <h1>Edit First Five Posts</h1>
