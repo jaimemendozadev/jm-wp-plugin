@@ -1,22 +1,15 @@
 import React, {Component} from 'react';
+import SinglePost from './SinglePost.jsx';
 
-class PostView extends Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      firstFive: this.props.firstFive || [],
-      rest: []
-    }
-  }
 
-  render(){
-    return (
-      <div>
-        {this.state.firstFive.map((post)=> {
-          return <SinglePost key={post.id} post={post} />
-        })}
-      </div> 
-    )
-  }
-
+var PostView = (props)=> {  
+  return(
+    <div>  
+      {props.firstFive.map((post, idx)=> {
+        return <SinglePost callBack={props.editPost} key={post.id} post={post} />
+      })}
+    </div>
+  )
 }
+
+export default PostView;
