@@ -1,1 +1,1 @@
-<script src="<?= plugins_url('js/public/bundle.js', dirname(__file__)) ?>"></script>
+<script src="<?php echo plugins_url('js/public/bundle.js', dirname(__file__)) ?>"></script>

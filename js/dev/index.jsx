@@ -1,15 +1,50 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
+import wpapi from 'wpapi';
+import Post from './post.jsx';
+import utils from './utils.jsx';
 
 class App extends Component {
   constructor(props){
     super(props);
+    this.state = {
+      firstFive: [],
+      rest: [], 
+      error: false
+    }
+  }
+  componentDidMount(){
+    var context = this;
+    var wp = new wpapi({endpoint: `${window.location.origin}/wp-json`});
+
+    wp.posts().then((data) => {
+      console.log("got the data bro!", data);
+      utils.setPostState(data, context);
+
+    }).catch((error)=> {
+      console.log("man bro you've messed up", error);
+      context.setState({error: true});
+    });
   }
 
   render() {
+    if (!this.state.firstFive.length > 0 && this.state.error === false) {
+      return(
+        <h1>Waiting for data...</h1>
+      )
+    }
+
+    if (this.state.error === true){
+      return(
+        <h1>Whoops! There was an error retrieving the posts. Please check back later.</h1>
+      )
+    }
     return(
+      
       <div>
-        <h1>Hello WordPress!</h1>
+        {this.state.firstFive.map((post)=> {
+          return <Post key={post.id} post={post} />
+        })}
       </div>
     )
   }
