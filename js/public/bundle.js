@@ -13198,11 +13198,11 @@ var _wpapi = __webpack_require__(203);
 
 var _wpapi2 = _interopRequireDefault(_wpapi);
 
-var _post = __webpack_require__(242);
+var _PostView = __webpack_require__(245);
 
-var _post2 = _interopRequireDefault(_post);
+var _PostView2 = _interopRequireDefault(_PostView);
 
-var _utils = __webpack_require__(243);
+var _utils = __webpack_require__(246);
 
 var _utils2 = _interopRequireDefault(_utils);
 
@@ -13213,6 +13213,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var wpURL = window.location.origin;
+var wp = new _wpapi2.default({ endpoint: wpURL + '/wp-json' });
 
 var App = function (_Component) {
   _inherits(App, _Component);
@@ -13234,13 +13237,12 @@ var App = function (_Component) {
     key: 'componentDidMount',
     value: function componentDidMount() {
       var context = this;
-      var wp = new _wpapi2.default({ endpoint: window.location.origin + '/wp-json' });
 
       wp.posts().then(function (data) {
         console.log("got the data bro!", data);
         _utils2.default.setPostState(data, context);
       }).catch(function (error) {
-        console.log("man bro you've messed up", error);
+        console.log("man bruh you f'd up", error);
         context.setState({ error: true });
       });
     }
@@ -13262,12 +13264,11 @@ var App = function (_Component) {
           'Whoops! There was an error retrieving the posts. Please check back later.'
         );
       }
+
       return _react2.default.createElement(
         'div',
         null,
-        this.state.firstFive.map(function (post) {
-          return _react2.default.createElement(_post2.default, { key: post.id, post: post });
-        })
+        _react2.default.createElement(_PostView2.default, { firstFive: this.state.firstFive })
       );
     }
   }]);
@@ -33742,15 +33743,16 @@ module.exports = registerRoute;
 
 
 /***/ }),
-/* 242 */
+/* 242 */,
+/* 243 */,
+/* 244 */,
+/* 245 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = __webpack_require__(101);
 
@@ -33758,40 +33760,45 @@ var _react2 = _interopRequireDefault(_react);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var Post = function Post(props) {
-  console.log("the props are " + props);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  return _react2.default.createElement(
-    "div",
-    { key: props.post.link, className: "post" },
-    _react2.default.createElement(
-      "h2",
-      { className: "post-title" },
-      _react2.default.createElement("a", { href: props.post.link,
-        dangerouslySetInnerHTML: { __html: props.post.title.rendered } })
-    ),
-    props.post.featured_media ? _react2.default.createElement(
-      "a",
-      { href: props.post.link },
-      _react2.default.createElement("img", { src: props.post._embedded['wp:featuredmedia'][0].media_details.sizes["large"].source_url })
-    ) : null,
-    props.post.excerpt.rendered ? _react2.default.createElement("div", { className: "excerpt", dangerouslySetInnerHTML: { __html: props.post.excerpt.rendered } }) : null,
-    _react2.default.createElement(
-      "div",
-      { className: "entry-meta" },
-      _react2.default.createElement(
-        "a",
-        { className: "button read-more", href: props.post.link },
-        "Read More \xBB"
-      )
-    )
-  );
-};
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-exports.default = Post;
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var PostView = function (_Component) {
+  _inherits(PostView, _Component);
+
+  function PostView(props) {
+    _classCallCheck(this, PostView);
+
+    var _this = _possibleConstructorReturn(this, (PostView.__proto__ || Object.getPrototypeOf(PostView)).call(this, props));
+
+    _this.state = {
+      firstFive: _this.props.firstFive || [],
+      rest: []
+    };
+    return _this;
+  }
+
+  _createClass(PostView, [{
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        null,
+        this.state.firstFive.map(function (post) {
+          return _react2.default.createElement(SinglePost, { key: post.id, post: post });
+        })
+      );
+    }
+  }]);
+
+  return PostView;
+}(_react.Component);
 
 /***/ }),
-/* 243 */
+/* 246 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -33815,19 +33822,14 @@ function setPostState(data, context) {
   //set the error state to true
   if (!data || data.length < 1) context.setState({ error: true });
 
-  //filter _paging key from   
+  //filter _paging key from data
   posts = data.map(function (post, key) {
     if (key !== '_paging') {
       return post;
     }
   });
 
-  //resort the posts order  
-  for (var i = posts.length - 1; i >= 0; --i) {
-    sortedPosts.push(posts[i]);
-  }
-
-  sortedPosts = sortedPosts.filter(function (post) {
+  sortedPosts = posts.filter(function (post) {
     return post !== null;
   });
 
@@ -33837,7 +33839,6 @@ function setPostState(data, context) {
   if (sortedPosts.length > 5) {
     firstFive = sortedPosts.slice(0, 5);
     rest = sortedPosts.slice(5);
-
     context.setState({ firstFive: firstFive, rest: rest });
   } else {
     context.setState({ firstFive: sortedPosts });

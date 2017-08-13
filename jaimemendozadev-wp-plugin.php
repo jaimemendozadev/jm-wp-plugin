@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: jaimemendozadev-wp-plugin
-Plugin URI:  https://somerandomurl.com
+Plugin URI:  https://github.com/jaimemendozadev/jm-wp-plugin
 Description: a simple plugin for the ProPhoto coding challenge
 Version:     20170813
 Author:      jaimemendoza.com
@@ -37,9 +37,9 @@ if ( ! defined( 'WPINC' ) ) {
 
  function add_submenu() {
    add_submenu_page( 
-     'tools.php', 
-     'Edit Recent Posts', 
-     'Edit Recent Posts', 
+     'edit.php', 
+     'Edit First Five Posts', 
+     'Edit First Five Posts', 
      'manage_options', 
      'edit_recent_posts', 
      'render_react'

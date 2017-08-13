@@ -1,7 +1,6 @@
 import React from 'react';
 
-var Post = (props) => {
-  console.log(`the props are ${props}`);
+var SinglePost = (props) => {
 
   return(
     <div key={props.post.link} className="post">
@@ -18,7 +17,7 @@ var Post = (props) => {
           <img className="avatar" src={post._embedded.author[0].avatar_urls['48']} />by&nbsp; {post._embedded.author[0].name}
         </a> */}
 
-		<a className="button read-more" href={props.post.link}>Read More &raquo;</a>
+		<a className="button read-more" href={props.post.link} target="_blank">Read More &raquo;</a>
 	  </div>
 	</div>
 
@@ -26,4 +25,4 @@ var Post = (props) => {
 
 }
 
-export default Post;
+export default SinglePost;
