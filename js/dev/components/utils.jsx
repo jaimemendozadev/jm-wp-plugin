@@ -17,7 +17,10 @@ function setPostState(data){
     if (key !== '_paging'){
       return post
     }
-  });  
+  });
+  
+  if(!posts || posts.length < 1) 
+    this.setState({error: true});
   
   sortedPosts = posts.filter((post)=> {
     return post !== null;
@@ -39,7 +42,7 @@ function setPostState(data){
 
 function getPosts(wpInstance, callBack){
   wpInstance.posts().then((data) => {
-    console.log("got the data bro!", data);
+    console.log("got the data from getPosts!", data);
     callBack(data);
 
   }).catch((error)=> {

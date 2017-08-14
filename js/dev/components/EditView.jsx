@@ -8,11 +8,10 @@ class EditView extends Component {
     super(props);
     this.state = {
       title: 'Enter a New Title',
-      current: this.props.toEdit,
-      refresh: false
+      current: this.props.toEdit
+      
     }
     this.handleChange = this.handleChange.bind(this);
-    this.triggerRefresh = this.triggerRefresh.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.deleteFromDB = utils.deleteFromDB.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -25,10 +24,6 @@ class EditView extends Component {
     });
   }
 
-  triggerRefresh(){
-    this.props.refresh();
-    this.setState({refresh: true});
-  }
 
   handleDelete(){
     this.props.delete(this.state.current.id);
@@ -63,7 +58,7 @@ class EditView extends Component {
         </form>
         
         <div style={{marginTop: '1em'}}>
-          <button onClick={this.triggerRefresh} style={{backgroundColor: 'green', borderRadius: '10px'}}>Click To Refresh Feed</button>
+          
 
           <button onClick={this.handleDelete} style={{backgroundColor: 'red', borderRadius: '10px'}}>Click To Delete Post</button>
         </div>

@@ -89,8 +89,11 @@ class App extends Component {
       <div style={styles.indexStyle}>
         <h1>Edit First Five Posts</h1>
         <p>Click on the 'Edit Post Title' button to edit the post title below.</p>
+        
+        <button onClick={this.triggerRefresh} style={{backgroundColor: 'green', borderRadius: '10px'}}>Click To Refresh Feed</button>
+        
         <div style={styles.editStyle}>
-          {this.state.toEdit ? <EditView refresh={this.triggerRefresh} delete={this.triggerDelete} submit={this.submitPostChanges} toEdit={this.state.toEdit} /> : ''}
+          {this.state.toEdit ? <EditView delete={this.triggerDelete} submit={this.submitPostChanges} toEdit={this.state.toEdit} /> : ''}
         </div>
         
         <PostView editPost={this.editPost} firstFive={this.state.firstFive} />

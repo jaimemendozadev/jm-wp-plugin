@@ -13327,9 +13327,14 @@ var App = function (_Component) {
           'Click on the \'Edit Post Title\' button to edit the post title below.'
         ),
         _react2.default.createElement(
+          'button',
+          { onClick: this.triggerRefresh, style: { backgroundColor: 'green', borderRadius: '10px' } },
+          'Click To Refresh Feed'
+        ),
+        _react2.default.createElement(
           'div',
           { style: styles.editStyle },
-          this.state.toEdit ? _react2.default.createElement(_EditView2.default, { refresh: this.triggerRefresh, 'delete': this.triggerDelete, submit: this.submitPostChanges, toEdit: this.state.toEdit }) : ''
+          this.state.toEdit ? _react2.default.createElement(_EditView2.default, { 'delete': this.triggerDelete, submit: this.submitPostChanges, toEdit: this.state.toEdit }) : ''
         ),
         _react2.default.createElement(_PostView2.default, { editPost: this.editPost, firstFive: this.state.firstFive })
       );
@@ -33864,6 +33869,8 @@ function setPostState(data) {
     }
   });
 
+  if (!posts || posts.length < 1) this.setState({ error: true });
+
   sortedPosts = posts.filter(function (post) {
     return post !== null;
   });
@@ -33884,7 +33891,7 @@ function getPosts(wpInstance, callBack) {
   var _this = this;
 
   wpInstance.posts().then(function (data) {
-    console.log("got the data bro!", data);
+    console.log("got the data from getPosts!", data);
     callBack(data);
   }).catch(function (error) {
     console.log("error fetching posts from DB", error);
@@ -34097,11 +34104,10 @@ var EditView = function (_Component) {
 
     _this.state = {
       title: 'Enter a New Title',
-      current: _this.props.toEdit,
-      refresh: false
+      current: _this.props.toEdit
+
     };
     _this.handleChange = _this.handleChange.bind(_this);
-    _this.triggerRefresh = _this.triggerRefresh.bind(_this);
     _this.handleDelete = _this.handleDelete.bind(_this);
     _this.deleteFromDB = _utils2.default.deleteFromDB.bind(_this);
     _this.handleSubmit = _this.handleSubmit.bind(_this);
@@ -34114,12 +34120,6 @@ var EditView = function (_Component) {
       this.setState({
         title: event.target.value
       });
-    }
-  }, {
-    key: 'triggerRefresh',
-    value: function triggerRefresh() {
-      this.props.refresh();
-      this.setState({ refresh: true });
     }
   }, {
     key: 'handleDelete',
@@ -34181,11 +34181,6 @@ var EditView = function (_Component) {
         _react2.default.createElement(
           'div',
           { style: { marginTop: '1em' } },
-          _react2.default.createElement(
-            'button',
-            { onClick: this.triggerRefresh, style: { backgroundColor: 'green', borderRadius: '10px' } },
-            'Click To Refresh Feed'
-          ),
           _react2.default.createElement(
             'button',
             { onClick: this.handleDelete, style: { backgroundColor: 'red', borderRadius: '10px' } },
