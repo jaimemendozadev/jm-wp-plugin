@@ -13260,15 +13260,48 @@ var App = function (_Component) {
       firstFive: [],
       rest: [],
       error: false,
-      toEdit: null
+      toEdit: null,
+      refresh: false,
+      postError: false
     };
     _this.editPost = _utils2.default.editPost.bind(_this);
     _this.getPosts = _utils2.default.getPosts.bind(_this);
+
     _this.setPostState = _utils2.default.setPostState.bind(_this);
+    _this.triggerRefresh = _this.triggerRefresh.bind(_this);
+    _this.triggerDelete = _this.triggerDelete.bind(_this);
+    _this.submitPostChanges = _utils2.default.submitPostChanges.bind(_this);
     return _this;
   }
 
   _createClass(App, [{
+    key: 'triggerRefresh',
+    value: function triggerRefresh() {
+      _utils2.default.getPosts(wp, this.setPostState);
+    }
+  }, {
+    key: 'triggerDelete',
+    value: function triggerDelete(id) {
+      if (this.state.rest.length <= 1) {
+        this.triggerRefresh();
+      }
+
+      var filteredPosts = this.state.firstFive.filter(function (post) {
+        return post.id !== id;
+      });
+
+      var remaining = this.state.rest;
+
+      filteredPosts.push(remaining[0]);
+
+      remaining.splice(0, 1);
+
+      this.setState({
+        firstFive: filteredPosts,
+        rest: remaining
+      });
+    }
+  }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
       _utils2.default.getPosts(wp, this.setPostState);
@@ -13276,8 +13309,8 @@ var App = function (_Component) {
   }, {
     key: 'render',
     value: function render() {
-      if (this.state.firstFive.length === 0) {
-        return _utils2.default.haveThePosts(this.state.firstFive, this.state.error);
+      if (this.state.firstFive.length === 0 || this.state.postError) {
+        return _utils2.default.haveThePosts(this.state.firstFive, this.state.error, this.state.postError);
       }
 
       return _react2.default.createElement(
@@ -13296,7 +13329,7 @@ var App = function (_Component) {
         _react2.default.createElement(
           'div',
           { style: styles.editStyle },
-          this.state.toEdit ? _react2.default.createElement(_EditView2.default, { toEdit: this.state.toEdit }) : ''
+          this.state.toEdit ? _react2.default.createElement(_EditView2.default, { refresh: this.triggerRefresh, 'delete': this.triggerDelete, submit: this.submitPostChanges, toEdit: this.state.toEdit }) : ''
         ),
         _react2.default.createElement(_PostView2.default, { editPost: this.editPost, firstFive: this.state.firstFive })
       );
@@ -33847,19 +33880,36 @@ function setPostState(data) {
   }
 }
 
-function getPosts(wpInstance, callback) {
+function getPosts(wpInstance, callBack) {
   var _this = this;
 
   wpInstance.posts().then(function (data) {
     console.log("got the data bro!", data);
-    callback(data);
+    callBack(data);
   }).catch(function (error) {
-    console.log("man bruh you f'd up", error);
+    console.log("error fetching posts from DB", error);
     _this.setState({ error: true });
   });
 }
 
-function haveThePosts(firstFive, error) {
+function deleteFromDB(id) {
+  var _this2 = this;
+
+  var wp = new _wpapi2.default({
+    endpoint: window.location.origin + '/wp-json',
+    nonce: secretCredentials.nonce
+  });
+
+  //make api call
+  wp.posts().id(id).delete().then(function (response) {
+    console.log('post deleted from DB, response is ' + JSON.stringify(response));
+  }).catch(function (error) {
+    console.log("error deleting post from DB", error);
+    _this2.setState({ postError: true });
+  });
+}
+
+function haveThePosts(firstFive, error, postError) {
   if (!firstFive.length > 0 && error === false) {
     return _react2.default.createElement(
       'h1',
@@ -33873,6 +33923,14 @@ function haveThePosts(firstFive, error) {
       'h1',
       null,
       'Whoops! There was an error retrieving the posts. Please check back later.'
+    );
+  }
+
+  if (postError === true) {
+    return _react2.default.createElement(
+      'h1',
+      null,
+      'Whoops! There was an error making the change to your post. Please try again.'
     );
   }
 }
@@ -33898,8 +33956,15 @@ function handleEscape(text) {
   });
 };
 
+function triggerRefresh() {
+  console.log("inside triggerRefresh!");
+  this.setState({
+    refresh: true
+  });
+}
+
 function submitPostChanges(id, title) {
-  var _this2 = this;
+  var _this3 = this;
 
   var wp = new _wpapi2.default({
     endpoint: window.location.origin + '/wp-json',
@@ -33913,17 +33978,19 @@ function submitPostChanges(id, title) {
   }).then(function (response) {
     console.log('post updates saved in DB, response is ' + JSON.stringify(response));
   }).catch(function (error) {
-    console.log("man bruh you f'd up", error);
-    _this2.setState({ postError: true });
+    console.log("error updating post in DB", error);
+    _this3.setState({ postError: true });
   });
 }
 
 var utils = {
   setPostState: setPostState,
   getPosts: getPosts,
+  deleteFromDB: deleteFromDB,
   haveThePosts: haveThePosts,
   editPost: editPost,
   handleEscape: handleEscape,
+  triggerRefresh: triggerRefresh,
   submitPostChanges: submitPostChanges
 };
 
@@ -34031,12 +34098,13 @@ var EditView = function (_Component) {
     _this.state = {
       title: 'Enter a New Title',
       current: _this.props.toEdit,
-      postError: false
+      refresh: false
     };
     _this.handleChange = _this.handleChange.bind(_this);
+    _this.triggerRefresh = _this.triggerRefresh.bind(_this);
+    _this.handleDelete = _this.handleDelete.bind(_this);
+    _this.deleteFromDB = _utils2.default.deleteFromDB.bind(_this);
     _this.handleSubmit = _this.handleSubmit.bind(_this);
-    _this.submitPostChanges = _utils2.default.submitPostChanges.bind(_this);
-
     return _this;
   }
 
@@ -34048,6 +34116,18 @@ var EditView = function (_Component) {
       });
     }
   }, {
+    key: 'triggerRefresh',
+    value: function triggerRefresh() {
+      this.props.refresh();
+      this.setState({ refresh: true });
+    }
+  }, {
+    key: 'handleDelete',
+    value: function handleDelete() {
+      this.props.delete(this.state.current.id);
+      this.deleteFromDB(this.state.current.id);
+    }
+  }, {
     key: 'handleSubmit',
     value: function handleSubmit(event) {
       event.preventDefault();
@@ -34055,7 +34135,7 @@ var EditView = function (_Component) {
       var id = this.state.current.id;
       var title = _utils2.default.handleEscape(this.state.title);
 
-      this.submitPostChanges(id, title);
+      this.props.submit(id, title);
     }
   }, {
     key: 'render',
@@ -34073,9 +34153,9 @@ var EditView = function (_Component) {
         _react2.default.createElement(
           'h1',
           null,
-          'Edit Your Post #',
-          this.props.toEdit.id,
-          ' Here'
+          'Edit Your Post titled: "',
+          this.props.toEdit.title.rendered,
+          '"'
         ),
         _react2.default.createElement(
           'h3',
@@ -34094,8 +34174,22 @@ var EditView = function (_Component) {
           _react2.default.createElement('input', { id: 'newTitle', onChange: this.handleChange, value: this.state.title }),
           _react2.default.createElement(
             'button',
-            null,
+            { style: { marginLeft: '.5em' } },
             'Click To Submit Change'
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { style: { marginTop: '1em' } },
+          _react2.default.createElement(
+            'button',
+            { onClick: this.triggerRefresh, style: { backgroundColor: 'green', borderRadius: '10px' } },
+            'Click To Refresh Feed'
+          ),
+          _react2.default.createElement(
+            'button',
+            { onClick: this.handleDelete, style: { backgroundColor: 'red', borderRadius: '10px' } },
+            'Click To Delete Post'
           )
         )
       );

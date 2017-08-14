@@ -37,19 +37,36 @@ function setPostState(data){
 }
 
 
-function getPosts(wpInstance, callback){
+function getPosts(wpInstance, callBack){
   wpInstance.posts().then((data) => {
     console.log("got the data bro!", data);
-    callback(data);
+    callBack(data);
 
   }).catch((error)=> {
-    console.log("man bruh you f'd up", error);
+    console.log("error fetching posts from DB", error);
     this.setState({error: true});
   });
 }
 
+function deleteFromDB(id){
+  var wp = new wpapi({
+    endpoint: `${window.location.origin}/wp-json`,
+    nonce: secretCredentials.nonce
+  });
 
-function haveThePosts(firstFive, error){
+  //make api call
+  wp.posts().id(id).delete().then((response) => {
+    console.log(`post deleted from DB, response is ${JSON.stringify(response)}`);
+
+  }).catch((error) => {
+    console.log("error deleting post from DB", error);
+    this.setState({postError: true})
+  });
+
+}
+
+
+function haveThePosts(firstFive, error, postError){
   if (!firstFive.length > 0 && error === false) {
     return(
       <h1>Waiting for data...</h1>
@@ -59,6 +76,12 @@ function haveThePosts(firstFive, error){
   if (error === true){
     return(
       <h1>Whoops! There was an error retrieving the posts. Please check back later.</h1>
+    )
+  }
+
+  if(postError === true){
+    return (
+      <h1>Whoops! There was an error making the change to your post. Please try again.</h1>  
     )
   }
 }
@@ -86,6 +109,14 @@ function handleEscape(text){
 };
 
 
+function triggerRefresh(){
+  console.log("inside triggerRefresh!")
+  this.setState({
+    refresh: true
+  });
+}
+
+
 function submitPostChanges(id, title){
 
   var wp = new wpapi({
@@ -99,13 +130,12 @@ function submitPostChanges(id, title){
     status: 'publish'
   }).then((response) => {
     console.log(`post updates saved in DB, response is ${JSON.stringify(response)}`);
+
   }).catch((error) => {
-    console.log("man bruh you f'd up", error);
+    console.log("error updating post in DB", error);
     this.setState({postError: true})
-  })
+  });
 }
-
-
 
 
 
@@ -114,9 +144,11 @@ function submitPostChanges(id, title){
 const utils = {
   setPostState: setPostState,
   getPosts: getPosts,
+  deleteFromDB: deleteFromDB,
   haveThePosts: haveThePosts,
   editPost: editPost,
   handleEscape: handleEscape,
+  triggerRefresh: triggerRefresh,
   submitPostChanges: submitPostChanges
 }
 

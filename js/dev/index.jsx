@@ -27,8 +27,6 @@ const styles = {
 }
  
 
-
-
 class App extends Component {
   constructor(props){
     super(props);
@@ -36,28 +34,63 @@ class App extends Component {
       firstFive: [],
       rest: [], 
       error: false,
-      toEdit: null
+      toEdit: null,
+      refresh: false,
+      postError: false
     }
     this.editPost = utils.editPost.bind(this);
     this.getPosts = utils.getPosts.bind(this);
+    
     this.setPostState = utils.setPostState.bind(this);
+    this.triggerRefresh = this.triggerRefresh.bind(this);
+    this.triggerDelete = this.triggerDelete.bind(this);
+    this.submitPostChanges = utils.submitPostChanges.bind(this);
   }
+
+  triggerRefresh(){
+    utils.getPosts(wp, this.setPostState);  
+  }
+
+  triggerDelete(id){
+    if (this.state.rest.length <= 1){
+      this.triggerRefresh();
+    }
+
+    var filteredPosts = this.state.firstFive.filter((post)=>{
+      return post.id !== id;
+    });
+
+    var remaining = this.state.rest;
+    
+    filteredPosts.push(remaining[0]);
+
+    remaining.splice(0,1)
+
+
+    this.setState({
+      firstFive: filteredPosts,
+      rest: remaining
+    });
+    
+  }
+
+
 
   componentDidMount(){
     utils.getPosts(wp, this.setPostState);
   }
 
   render() {
-    if (this.state.firstFive.length === 0){
-      return utils.haveThePosts(this.state.firstFive, this.state.error);
+    if (this.state.firstFive.length === 0 || this.state.postError){
+      return utils.haveThePosts(this.state.firstFive, this.state.error, this.state.postError);
     }
-    
+
     return(
       <div style={styles.indexStyle}>
         <h1>Edit First Five Posts</h1>
         <p>Click on the 'Edit Post Title' button to edit the post title below.</p>
         <div style={styles.editStyle}>
-          {this.state.toEdit ? <EditView toEdit={this.state.toEdit} /> : ''}
+          {this.state.toEdit ? <EditView refresh={this.triggerRefresh} delete={this.triggerDelete} submit={this.submitPostChanges} toEdit={this.state.toEdit} /> : ''}
         </div>
         
         <PostView editPost={this.editPost} firstFive={this.state.firstFive} />
