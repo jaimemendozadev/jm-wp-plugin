@@ -34040,11 +34040,6 @@ var SinglePost = function SinglePost(props) {
       _react2.default.createElement('a', { href: props.post.link,
         dangerouslySetInnerHTML: { __html: props.post.title.rendered } })
     ),
-    props.post.featured_media ? _react2.default.createElement(
-      'a',
-      { href: props.post.link },
-      _react2.default.createElement('img', { src: props.post._embedded['wp:featuredmedia'][0].media_details.sizes["large"].source_url })
-    ) : null,
     props.post.excerpt.rendered ? _react2.default.createElement('div', { className: 'excerpt', dangerouslySetInnerHTML: { __html: props.post.excerpt.rendered } }) : null,
     _react2.default.createElement(
       'div',

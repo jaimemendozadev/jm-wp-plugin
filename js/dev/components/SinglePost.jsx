@@ -17,8 +17,6 @@ var SinglePost = (props) => {
 	  <h2 className="post-title"><a href={props.post.link}
 		  dangerouslySetInnerHTML={{__html:props.post.title.rendered}} /></h2>
 
-	  {props.post.featured_media ? <a href={props.post.link}><img src={props.post._embedded['wp:featuredmedia'][0].media_details.sizes["large"].source_url} /></a> : null}
-
     {props.post.excerpt.rendered ? <div className="excerpt" dangerouslySetInnerHTML={{__html:props.post.excerpt.rendered}} /> : null}
       
     <div className="entry-meta">
